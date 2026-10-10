@@ -12,12 +12,22 @@ const STATUS = {
   rejected: { label: 'Отказан', cls: 'n' },
 };
 const ORDER = ['new', 'contacted', 'interview', 'hired', 'rejected'];
+const ORANGE = { background: 'var(--tint)', color: 'var(--orange)' };
+const CARDS = [
+  { k: '', icon: 'users', label: 'всички кандидати' },
+  { k: 'new', icon: 'spark', label: 'нови', color: ORANGE },
+  { k: 'contacted', icon: 'clock', label: 'потърсени', color: ORANGE },
+  { k: 'interview', icon: 'users', label: 'на интервю', color: ORANGE },
+  { k: 'hired', icon: 'checkc', label: 'наети', color: { background: 'var(--green-bg)', color: 'var(--green)' } },
+  { k: 'rejected', icon: 'close', label: 'отказани', color: { background: '#F1EEEC', color: 'var(--muted)' } },
+];
 
 export default function Candidates() {
   const [data, setData] = useState(null);
   const [qr, setQr] = useState('');
   const applyUrl = window.location.origin + '/apply';
   const [copied, setCopied] = useState(false);
+  const [show, setShow] = useState(''); // '' = всички, иначе статус
 
   function load() { api.managerApplications().then(setData); }
   useEffect(() => {
@@ -25,6 +35,7 @@ export default function Candidates() {
     QRCode.toDataURL(applyUrl, { margin: 1, width: 220, color: { dark: '#1D1D1B', light: '#FFFFFF' } }).then(setQr).catch(() => {});
   }, []);
   if (!data) return <Loading />;
+  const shown = show ? data.applications.filter((a) => a.status === show) : data.applications;
 
   async function setStatus(id, status) { await api.updateApplication(id, status); load(); }
   async function remove(a) {
@@ -56,25 +67,29 @@ export default function Candidates() {
         </div>
       </div>
 
-      {/* брояч по статус */}
+      {/* брояч по статус – клик показва само тази група */}
       <div className="stats">
-        <div className="card stat"><div className="ic"><Icon name="users" size={24} /></div><div><b>{data.total}</b><span>всички кандидати</span></div></div>
-        <div className="card stat"><div className="ic" style={{ background: 'var(--tint)', color: 'var(--orange)' }}><Icon name="spark" size={24} /></div><div><b>{data.counts.new}</b><span>нови</span></div></div>
-        <div className="card stat"><div className="ic" style={{ background: 'var(--tint)', color: 'var(--orange)' }}><Icon name="users" size={24} /></div><div><b>{data.counts.interview}</b><span>на интервю</span></div></div>
-        <div className="card stat"><div className="ic" style={{ background: 'var(--green-bg)', color: 'var(--green)' }}><Icon name="checkc" size={24} /></div><div><b>{data.counts.hired}</b><span>наети</span></div></div>
+        {CARDS.map((c) => (
+          <button key={c.k} type="button" className={'card stat click' + (show === c.k ? ' on' : '')} onClick={() => setShow(c.k)}>
+            <div className="ic" style={c.color}><Icon name={c.icon} size={24} /></div>
+            <div><b>{c.k ? data.counts[c.k] : data.total}</b><span>{c.label}</span></div>
+          </button>
+        ))}
       </div>
 
       {/* списък */}
       <div className="card" style={{ overflowX: 'auto' }}>
-        {data.applications.length === 0 ? (
-          <div className="empty">Още няма кандидатури. Сподели линка/QR кода, за да получиш първите.</div>
+        {shown.length === 0 ? (
+          <div className="empty">{data.applications.length === 0
+            ? 'Още няма кандидатури. Сподели линка/QR кода, за да получиш първите.'
+            : 'Няма кандидати в тази група.'}</div>
         ) : (
           <table className="table">
             <thead>
               <tr><th>Кандидат</th><th>За връзка</th><th>Позиция</th><th>Град</th><th>Дата</th><th>Статус</th><th></th></tr>
             </thead>
             <tbody>
-              {data.applications.map((a) => (
+              {shown.map((a) => (
                 <tr key={a.id} style={{ cursor: 'default' }}>
                   <td>
                     <div className="emp">

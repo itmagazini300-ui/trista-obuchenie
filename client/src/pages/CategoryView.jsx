@@ -35,7 +35,9 @@ export default function CategoryView() {
       </div>
 
       <p className="muted" style={{ fontSize: 13.5, margin: '0 0 10px', display: 'flex', alignItems: 'center', gap: 7 }}>
-        <Icon name="lock" size={15} /> Модулите се отключват един по един — завърши текущия, за да продължиш към следващия.
+        <Icon name="lock" size={15} /> {data.discRequired
+          ? 'Модулите се отключват, след като попълниш личностния въпросник.'
+          : 'Модулите се отключват един по един — след като предадеш теста, ментор или управител отключва следващия.'}
       </p>
       <div className="card">
         {cat.modules.map((m, i) => (
@@ -44,20 +46,22 @@ export default function CategoryView() {
               <div className="num lock"><Icon name="lock" size={15} /></div>
               <div className="t">
                 <b>{m.title}</b>
-                <span>Завърши предишния модул, за да го отключиш.</span>
+                <span>{data.discRequired ? 'Първо попълни личностния въпросник.'
+                  : cat.modules[i - 1]?.status === 'submitted' ? 'Чака решение на ментора/управителя за предишния модул.'
+                  : 'Отключва се след одобрение на предишния модул.'}</span>
               </div>
               <StatusPill status={m.status} />
             </div>
           ) : (
             <div key={m.id} className="modrow" onClick={() => nav('/module/' + m.id)} style={{ cursor: 'pointer' }}>
               <div className={'num' + (m.status === 'completed' ? ' done' : '')}>
-                {m.status === 'completed' ? <Icon name="check" size={15} /> : i + 1}
+                {m.status === 'completed' ? <Icon name="check" size={15} /> : m.status === 'submitted' ? <Icon name="clock" size={15} /> : i + 1}
               </div>
               <div className="t">
                 <b>{m.title}</b>
                 <span>{m.summary}{m.duration ? ` · ~${m.duration} мин` : ''}</span>
               </div>
-              {m.status === 'completed' && <span className="sc">{m.score}%</span>}
+              {(m.status === 'completed' || m.status === 'submitted') && <span className="sc">{m.score}%</span>}
               <StatusPill status={m.status} />
               <Icon name="arrowr" size={18} className="muted" />
             </div>

@@ -151,6 +151,10 @@ h1,h2,h3{margin:0;font-weight:900;letter-spacing:-.02em;text-wrap:balance}
 .stat .ic svg{width:24px;height:24px}
 .stat b{font-size:26px;font-weight:900;line-height:1;display:block}
 .stat span{color:var(--muted);font-size:13px;font-weight:600}
+.stat.click{cursor:pointer;text-align:left;font:inherit;color:inherit;width:100%;transition:border-color .15s,transform .15s}
+.stat.click:hover{border-color:var(--orange);transform:translateY(-1px)}
+.stat.click.on{border-color:var(--orange);box-shadow:0 0 0 3px var(--tint)}
+.stat .hint{display:block;font-size:11.5px;font-weight:600;color:var(--muted);opacity:.8;margin-top:2px}
 
 /* ---------- login ---------- */
 .login-wrap{min-height:100vh;display:grid;grid-template-columns:1.1fr .9fr}

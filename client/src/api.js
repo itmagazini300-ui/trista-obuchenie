@@ -37,6 +37,12 @@ export const api = {
   discRequestCount: () => request('/manager/disc-requests/count'),
   approveDiscRequest: (id, mentorId) => request('/manager/disc-requests/' + id + '/approve', { method: 'POST', body: JSON.stringify({ mentorId }) }),
   rejectDiscRequest: (id) => request('/manager/disc-requests/' + id + '/reject', { method: 'POST' }),
+  // решения по обучението (управител или ментор на служителя)
+  myMentees: () => request('/review/mentees'),
+  reviewEmployee: (id) => request('/review/employees/' + id),
+  approveModule: (empId, moduleId) => request('/review/employees/' + empId + '/modules/' + moduleId + '/approve', { method: 'POST' }),
+  retryModule: (empId, moduleId) => request('/review/employees/' + empId + '/modules/' + moduleId + '/retry', { method: 'POST' }),
+  resetDisc: (empId) => request('/review/employees/' + empId + '/disc/reset', { method: 'POST' }),
   completeMentee: (id) => request('/manager/mentees/' + id + '/complete', { method: 'POST' }),
 
   // публично – без вход

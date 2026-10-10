@@ -4,7 +4,6 @@ import { api } from '../api.js';
 import { useAuth } from '../App.jsx';
 import { Icon } from '../icons.jsx';
 import { Bar, Ring, Loading } from '../components.jsx';
-import Welcome from './Welcome.jsx';
 
 const LEVELS = [
   { n: 'Начинаещ', d: 'Базови модули и правила', range: '0–40%' },
@@ -25,12 +24,25 @@ export default function EmployeeHome() {
 
   return (
     <div className="wrap">
-      {!user.seen_welcome && <Welcome />}
       <div className="page-head">
         <div className="eyebrow">Моите обучения</div>
         <h1>Здравей, {user.name.split(' ')[0]}!</h1>
         <p>Продължи обучението си. Завършените модули и оценки се виждат от твоя управител в реално време.</p>
       </div>
+
+      {data.discRequired && (
+        <div className="card" style={{ padding: '20px 24px', marginBottom: 22, display: 'flex', gap: 18, alignItems: 'center', flexWrap: 'wrap', borderLeft: '5px solid var(--orange)' }}>
+          <div style={{ width: 46, height: 46, borderRadius: 12, background: 'var(--tint)', color: 'var(--orange)', display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 'none' }}>
+            <Icon name="spark" size={24} />
+          </div>
+          <div style={{ flex: 1, minWidth: 220 }}>
+            <div className="eyebrow" style={{ fontSize: 12 }}>Стъпка 2 от 3</div>
+            <b style={{ fontSize: 17 }}>Попълни личностния въпросник</b>
+            <div className="muted" style={{ fontSize: 13.5 }}>Обучителните модули се отключват, след като го изпратиш. Попълва се само веднъж.</div>
+          </div>
+          <button className="btn" onClick={() => nav('/disc')}>Към въпросника <Icon name="arrowr" size={18} /></button>
+        </div>
+      )}
 
       {/* обобщение */}
       <div className="card" style={{ padding: 24, display: 'flex', alignItems: 'center', gap: 26, marginBottom: 22, flexWrap: 'wrap' }}>

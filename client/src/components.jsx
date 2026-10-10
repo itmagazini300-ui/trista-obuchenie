@@ -35,6 +35,7 @@ export function Bar({ percent = 0, tone }) {
 
 const STATUS = {
   completed: { cls: 'g', label: 'Завършен' },
+  submitted: { cls: 'a', label: 'Чака решение' },
   in_progress: { cls: 'a', label: 'В процес' },
   not_started: { cls: 'n', label: 'Не е започнат' },
 };

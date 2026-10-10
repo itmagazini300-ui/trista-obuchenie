@@ -25,6 +25,8 @@ import Apply from './pages/Apply.jsx';
 import DiscStart from './pages/DiscStart.jsx';
 import Videos from './pages/Videos.jsx';
 import AdminVideos from './pages/AdminVideos.jsx';
+import MyMentees from './pages/MyMentees.jsx';
+import Welcome from './pages/Welcome.jsx';
 
 const AuthCtx = createContext(null);
 export const useAuth = () => useContext(AuthCtx);
@@ -63,6 +65,8 @@ export default function App() {
           <Route path="/onboarding" element={<Onboarding />} />
           <Route path="/manager" element={<ManagerHome />} />
           <Route path="/manager/employee/:id" element={<ManagerEmployee />} />
+          <Route path="/mentees" element={<MyMentees />} />
+          <Route path="/mentees/:id" element={<ManagerEmployee />} />
           <Route path="/companies" element={<Companies />} />
           <Route path="/candidates" element={<Candidates />} />
           <Route path="/requests" element={<Requests />} />
@@ -91,6 +95,8 @@ function Layout() {
   const [menuOpen, setMenuOpen] = useState(false);
   const location = useLocation();
   const [pendingCount, setPendingCount] = useState(0);
+  const [reviewCount, setReviewCount] = useState(0);
+  const isMentor = !isManager && !!user.is_mentor;
   useEffect(() => {
     if (!isManager) return;
     const refresh = () => api.discRequestCount().then((d) => setPendingCount(d.pending)).catch(() => {});
@@ -98,6 +104,10 @@ function Layout() {
     window.addEventListener('requests-changed', refresh);
     return () => window.removeEventListener('requests-changed', refresh);
   }, [isManager, location.pathname]);
+  useEffect(() => {
+    if (!isMentor) return;
+    api.myMentees().then((d) => setReviewCount(d.pendingReviews)).catch(() => {});
+  }, [isMentor, location.pathname]);
 
   async function doLogout() { setMenuOpen(false); await logout(); nav('/login'); }
 
@@ -129,6 +139,11 @@ function Layout() {
               <NavLink to="/disc" className={({ isActive }) => isActive ? 'active' : ''}>Личностен въпросник</NavLink>
               <NavLink to="/onboarding" className={({ isActive }) => isActive ? 'active' : ''}>Онбординг</NavLink>
               <NavLink to="/certificates" className={({ isActive }) => isActive ? 'active' : ''}>Сертификати</NavLink>
+              {isMentor && (
+                <NavLink to="/mentees" className={({ isActive }) => isActive ? 'active' : ''}>
+                  Моите обучаеми{reviewCount > 0 && <span className="pill a" style={{ marginLeft: 6, padding: '1px 7px' }}>{reviewCount}</span>}
+                </NavLink>
+              )}
             </>
           )}
         </nav>
@@ -141,6 +156,8 @@ function Layout() {
           <Icon name="logout" size={18} />
         </button>
       </header>
+      {/* Първа стъпка на всеки нов служител – приветственото писмо, на която и страница да влезе */}
+      {!isManager && !user.seen_welcome && <Welcome />}
       <Outlet />
     </>
   );

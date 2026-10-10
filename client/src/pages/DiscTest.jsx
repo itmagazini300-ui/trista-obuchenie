@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { api } from '../api.js';
 import { useAuth } from '../App.jsx';
 import { Icon } from '../icons.jsx';
@@ -30,7 +31,7 @@ function Wheel({ styles, primary, scores }) {
   );
 }
 
-function Result({ data, onRetake }) {
+function Result({ data, takenAt }) {
   const s = data.styles[data.primary];
   return (
     <>
@@ -57,13 +58,18 @@ function Result({ data, onRetake }) {
           </div>
         </div>
       </div>
-      <button className="btn ghost" onClick={onRetake}>Попълни въпросника отново</button>
+      <div className="muted" style={{ display: 'flex', gap: 8, alignItems: 'center', fontSize: 13.5 }}>
+        <Icon name="lock" size={15} /> Въпросникът е изпратен{takenAt ? ` на ${takenAt.slice(0, 10)}` : ''} и е заключен. Ново попълване може да разреши само ментор или управител.
+      </div>
     </>
   );
 }
 
 export default function DiscTest() {
   const { patchUser } = useAuth();
+  const nav = useNavigate();
+  const [err, setErr] = useState('');
+  const [justSent, setJustSent] = useState(false);
   const [data, setData] = useState(null);
   const [answers, setAnswers] = useState({});
   const [result, setResult] = useState(null);
@@ -83,16 +89,21 @@ export default function DiscTest() {
   const allAnswered = data.questions.every((q) => answers[q.id]);
 
   async function submit() {
+    if (!confirm('Да изпратя ли отговорите? След изпращане въпросникът се заключва и не може да се попълни отново.')) return;
     setBusy(true);
+    setErr('');
     try {
       const r = await api.submitDisc(answers);
       setResult(r);
+      setData((d) => ({ ...d, takenAt: new Date().toISOString() }));
       patchUser({ disc_result: r.primary });
+      setJustSent(true);
       setMode('result');
       window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch (ex) {
+      setErr(ex.message);
     } finally { setBusy(false); }
   }
-  function retake() { setAnswers({}); setResult(null); setMode('test'); }
 
   return (
     <div className="wrap" style={{ maxWidth: 820 }}>
@@ -102,7 +113,16 @@ export default function DiscTest() {
         <p>Въпросникът показва предпочитанията ни в поведение и комуникация. Помага ни да работим по-добре заедно — няма грешни отговори.</p>
       </div>
 
-      {mode === 'result' && <Result data={result} onRetake={retake} />}
+      {mode === 'result' && (
+        <>
+          <Result data={result} takenAt={data.takenAt} />
+          {justSent && (
+            <button className="btn" style={{ marginTop: 18 }} onClick={() => nav('/')}>
+              Към обучителните модули <Icon name="arrowr" size={18} />
+            </button>
+          )}
+        </>
+      )}
 
       {mode === 'intro' && (
         <div className="card" style={{ padding: 30 }}>
@@ -138,8 +158,9 @@ export default function DiscTest() {
             ))}
           </div>
           <div style={{ marginTop: 18, display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
-            <button className="btn" disabled={!allAnswered || busy} onClick={submit}>{busy ? 'Изчислявам…' : 'Виж резултата'}</button>
+            <button className="btn" disabled={!allAnswered || busy} onClick={submit}>{busy ? 'Изпращам…' : 'Изпрати въпросника'}</button>
             {!allAnswered && <span className="muted" style={{ fontSize: 13.5 }}>Отговори на всички въпроси.</span>}
+            {err && <span className="err" style={{ margin: 0 }}>{err}</span>}
           </div>
         </>
       )}

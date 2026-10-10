@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { api } from '../api.js';
 import { useAuth } from '../App.jsx';
 import { Icon } from '../icons.jsx';
@@ -9,20 +10,23 @@ const STEPS = [
   { icon: 'book', t: 'Обучителни модули', d: 'Презентации, видеа, ръководства и тестове за проверка.' },
 ];
 const FIRST_STEPS = [
+  'Попълни личностния въпросник, за да опознаеш себе си',
   'Прегледай модул „Добре дошъл в Триста"',
   'Запознай се с основните стандарти',
-  'Попълни личностния въпросник, за да опознаеш себе си',
   'Приготви въпросите си за първата среща с ментора',
 ];
 
 export default function Welcome() {
   const { user, patchUser } = useAuth();
+  const nav = useNavigate();
   const [closing, setClosing] = useState(false);
+  const discNext = !user.disc_result; // следваща стъпка – личностният въпросник
 
   async function dismiss() {
     setClosing(true);
     try { await api.welcomeSeen(); } catch { /* без значение */ }
     patchUser({ seen_welcome: 1 });
+    nav(discNext ? '/disc' : '/');
   }
 
   return (
@@ -77,7 +81,7 @@ export default function Welcome() {
           </div>
 
           <button className="btn block" style={{ marginTop: 16 }} disabled={closing} onClick={dismiss}>
-            {closing ? 'Момент…' : 'Разбрах, да започваме!'}
+            {closing ? 'Момент…' : discNext ? 'Напред към личностния въпросник' : 'Разбрах, да започваме!'}
           </button>
         </div>
       </div>

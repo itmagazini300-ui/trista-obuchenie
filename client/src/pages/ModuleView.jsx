@@ -26,8 +26,17 @@ export default function ModuleView() {
         <div className="card" style={{ padding: 40, textAlign: 'center' }}>
           <div style={{ color: 'var(--muted)', marginBottom: 12 }}><Icon name="lock" size={44} /></div>
           <h1 style={{ fontSize: 22, textTransform: 'uppercase' }}>Модулът е заключен</h1>
-          <p className="muted" style={{ marginTop: 8 }}>Завърши предишния модул в категорията, за да отключиш „{m.title}".</p>
-          <Link to={'/category/' + m.category.id} className="btn" style={{ marginTop: 16 }}>Към категорията</Link>
+          {m.discRequired ? (
+            <>
+              <p className="muted" style={{ marginTop: 8 }}>Първо попълни личностния въпросник — след това модулите се отключват.</p>
+              <Link to="/disc" className="btn" style={{ marginTop: 16 }}>Към въпросника</Link>
+            </>
+          ) : (
+            <>
+              <p className="muted" style={{ marginTop: 8 }}>„{m.title}" се отключва, след като ментор или управител одобри предишния модул.</p>
+              <Link to={'/category/' + m.category.id} className="btn" style={{ marginTop: 16 }}>Към категорията</Link>
+            </>
+          )}
         </div>
       </div>
     );
@@ -41,7 +50,7 @@ export default function ModuleView() {
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 6 }}>
           <span className="eyebrow">Урок</span>
           <StatusPill status={m.status} />
-          {m.status === 'completed' && <span className="sc" style={{ color: 'var(--green)', fontWeight: 900 }}>Оценка: {m.score}%</span>}
+          {(m.status === 'completed' || m.status === 'submitted') && <span className="sc" style={{ color: m.status === 'completed' ? 'var(--green)' : 'var(--orange)', fontWeight: 900 }}>Оценка: {m.score}%</span>}
         </div>
         <h1 style={{ fontSize: 30, textTransform: 'uppercase', marginBottom: 4 }}>{m.title}</h1>
         <p className="muted" style={{ marginTop: 0 }}>{m.summary}</p>
@@ -79,12 +88,27 @@ export default function ModuleView() {
         </div>
 
         <div style={{ marginTop: 24, paddingTop: 20, borderTop: '1px solid var(--line-2)', display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
-          <button className="btn" onClick={() => nav('/module/' + m.id + '/test')}>
-            <Icon name="checkc" size={18} /> {m.status === 'completed' ? 'Направи теста отново' : 'Към теста'}
-          </button>
-          <span className="muted" style={{ fontSize: 13.5 }}>
-            {m.questions.length} въпроса · нужни са минимум {m.passScore}% за преминаване
-          </span>
+          {m.status === 'submitted' && (
+            <span style={{ display: 'flex', gap: 8, alignItems: 'center', fontWeight: 700, color: 'var(--orange-dk)' }}>
+              <Icon name="clock" size={18} /> Тестът е предаден и е заключен. Ментор или управител ще реши дали продължаваш към следващия модул, или го повтаряш.
+            </span>
+          )}
+          {m.status === 'completed' && (
+            <span style={{ display: 'flex', gap: 8, alignItems: 'center', fontWeight: 700, color: 'var(--green)' }}>
+              <Icon name="checkc" size={18} /> Модулът е завършен и одобрен.
+            </span>
+          )}
+          {!m.testLocked && (
+            <>
+              <button className="btn" onClick={() => nav('/module/' + m.id + '/test')}>
+                <Icon name="checkc" size={18} /> {m.attempts > 0 ? 'Направи теста отново' : 'Към теста'}
+              </button>
+              <span className="muted" style={{ fontSize: 13.5 }}>
+                {m.attempts > 0 && <b style={{ color: 'var(--orange-dk)' }}>Върнат за повторение · </b>}
+                {m.questions.length} въпроса · тестът се предава само веднъж
+              </span>
+            </>
+          )}
         </div>
       </div>
     </div>
