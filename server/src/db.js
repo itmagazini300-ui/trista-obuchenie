@@ -106,8 +106,8 @@ export function initSchema() {
       id           INTEGER PRIMARY KEY AUTOINCREMENT,
       user_id      INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
       module_id    INTEGER NOT NULL REFERENCES modules(id) ON DELETE CASCADE,
-      status       TEXT NOT NULL DEFAULT 'not_started', -- 'not_started'|'in_progress'|'completed'
-      score        INTEGER,                             -- най-добър резултат от теста в %
+      status       TEXT NOT NULL DEFAULT 'not_started', -- 'not_started'|'in_progress'|'submitted'|'completed'
+      score        INTEGER,                             -- резултат от последния предаден тест в %
       completed_at TEXT,
       updated_at   TEXT DEFAULT (datetime('now')),
       UNIQUE (user_id, module_id)
@@ -160,6 +160,8 @@ function migrate() {
   addCol('users', 'phone', 'phone TEXT');
   addCol('users', 'mentor_style', 'mentor_style TEXT');
   addCol('users', 'mentorship_done_at', 'mentorship_done_at TEXT');
+  addCol('progress', 'attempts', 'attempts INTEGER NOT NULL DEFAULT 0'); // брой предадени опити на теста
+  addCol('progress', 'submitted_at', 'submitted_at TEXT');
   addCol('modules', 'duration', 'duration INTEGER');
   addCol('stores', 'company_id', 'company_id INTEGER');
   addCol('stores', 'kind', "kind TEXT NOT NULL DEFAULT 'магазин'");

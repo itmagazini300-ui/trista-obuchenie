@@ -19,12 +19,14 @@ router.get('/modules/:id', (req, res) => {
   res.json(data);
 });
 
-const LOCKED_MSG = 'Този модул още е заключен. Първо завърши предишния модул.';
+const LOCKED_MSG = 'Този модул още е заключен. Отключва се, след като ментор или управител одобри предишния.';
+const DISC_MSG = 'Първо попълни личностния въпросник.';
+const lockedError = (req) => (req.user.role === 'employee' && !req.user.disc_result ? DISC_MSG : LOCKED_MSG);
 
 // Отваряне на модул -> отбелязва "в процес"
 router.post('/modules/:id/open', (req, res) => {
   const id = Number(req.params.id);
-  if (moduleLocked(req.user.id, id)) return res.status(403).json({ error: LOCKED_MSG });
+  if (moduleLocked(req.user.id, id)) return res.status(403).json({ error: lockedError(req) });
   markOpened(req.user.id, id);
   res.json({ ok: true });
 });
@@ -32,9 +34,9 @@ router.post('/modules/:id/open', (req, res) => {
 // Предаване на теста
 router.post('/modules/:id/submit', (req, res) => {
   const id = Number(req.params.id);
-  if (moduleLocked(req.user.id, id)) return res.status(403).json({ error: LOCKED_MSG });
+  if (moduleLocked(req.user.id, id)) return res.status(403).json({ error: lockedError(req) });
   const result = submitTest(req.user.id, id, req.body?.answers || {});
-  if (result.error) return res.status(400).json(result);
+  if (result.error) return res.status(result.code).json({ error: result.error });
   res.json(result);
 });
 
@@ -61,7 +63,10 @@ router.get('/disc', (req, res) => {
   });
 });
 
+// Въпросникът се попълва веднъж; ново попълване – само ако управител/ментор го разреши.
 router.post('/disc', (req, res) => {
+  const taken = db.prepare('SELECT disc_result FROM users WHERE id = ?').get(req.user.id);
+  if (taken?.disc_result) return res.status(409).json({ error: 'Въпросникът вече е попълнен.' });
   const answers = req.body?.answers || {};
   const answered = DISC_QUESTIONS.every((q) => answers[q.id]);
   if (!answered) return res.status(400).json({ error: 'Отговори на всички въпроси.' });

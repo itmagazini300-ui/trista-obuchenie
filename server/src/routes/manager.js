@@ -32,6 +32,7 @@ router.get('/overview', (req, res) => {
       totalModules: c.totalModules,
       completedCategories: c.completedCategories,
       totalCategories: c.totalCategories,
+      pendingReviews: c.pendingReviews,
     };
   });
 
@@ -47,6 +48,7 @@ router.get('/overview', (req, res) => {
       avgLevel: levelFor(avg).name,
       fullyTrained,
       atRisk,
+      pendingReviews: rows.reduce((s, r) => s + r.pendingReviews, 0),
     },
   });
 });

@@ -13,6 +13,7 @@ import storesRoutes from './routes/stores.js';
 import companiesRoutes from './routes/companies.js';
 import discRequestsRoutes from './routes/discRequests.js';
 import publicDiscRoutes from './routes/publicDisc.js';
+import reviewRoutes from './routes/review.js';
 
 export function createApp() {
   const app = express();
@@ -24,6 +25,7 @@ export function createApp() {
   app.get('/api/health', (_req, res) => res.json({ ok: true }));
   app.use('/api/auth', authRoutes);
   app.use('/api/learn', learnRoutes);
+  app.use('/api/review', reviewRoutes);
   app.use('/api/manager/disc-requests', discRequestsRoutes);
   app.use('/api/manager', managerRoutes);
   app.use('/api/admin/stores', storesRoutes);
