@@ -1,10 +1,11 @@
 import { Router } from 'express';
+import { applyLimit } from '../rateLimit.js';
 import { db } from '../db.js';
 
 // Публичен маршрут – без вход. За формата за кандидатстване (QR код).
 const router = Router();
 
-router.post('/', (req, res) => {
+router.post('/', applyLimit, (req, res) => {
   const { name, phone, email, position, city, message } = req.body || {};
   if (!name?.trim()) return res.status(400).json({ error: 'Въведи име.' });
   if (!phone?.trim() && !email?.trim())

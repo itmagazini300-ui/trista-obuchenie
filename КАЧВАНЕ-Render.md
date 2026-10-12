@@ -5,22 +5,10 @@
 
 ---
 
-## Стъпка 1 — Качи кода в GitHub (с GitHub Desktop)
+## Стъпка 1 — Кодът в GitHub ✔ (вече е направено)
 
-1. Свали и инсталирай **GitHub Desktop**: https://desktop.github.com
-2. Отвори го и влез/регистрирай се с GitHub акаунт (безплатно).
-3. Горе вляво: **File → Add local repository…**
-4. Избери папката: `C:\Users\Пламен\Desktop\trista-obuchenie` → **Add repository**.
-   (Кодът вече е подготвен като хранилище — GitHub Desktop ще го разпознае.)
-5. Натисни синия бутон **Publish repository**.
-   - Махни отметката „Keep this code private", ако искаш Render да го вижда по-лесно
-     (може и да остане частно — Render има достъп след свързване).
-   - Натисни **Publish repository**.
-
-Готово — кодът е в GitHub.
-
-> При всяка бъдеща промяна: в GitHub Desktop пишеш кратко описание долу вляво →
-> **Commit to main** → **Push origin**. Render сам ще обнови сайта.
+Кодът е в `github.com/itmagazini300-ui/trista-obuchenie` и се обновява при всяка промяна.
+Render сам пуска новата версия след всяко качване.
 
 ---
 

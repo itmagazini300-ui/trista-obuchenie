@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { loginLimit } from '../rateLimit.js';
 import bcrypt from 'bcryptjs';
 import { db } from '../db.js';
 import { normalizePhone } from '../phone.js';
@@ -6,7 +7,7 @@ import { signToken, cookieOptions, COOKIE_NAME, requireAuth } from '../auth.js';
 
 const router = Router();
 
-router.post('/login', (req, res) => {
+router.post('/login', loginLimit, (req, res) => {
   const { password } = req.body || {};
   const login = String(req.body?.login ?? req.body?.email ?? '').trim();
   if (!login || !password)

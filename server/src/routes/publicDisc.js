@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { discSubmitLimit, publicCheckLimit } from '../rateLimit.js';
 import { db } from '../db.js';
 import { DISC_QUESTIONS, scoreDisc } from '../disc.js';
 import { normalizePhone } from '../phone.js';
@@ -21,14 +22,14 @@ router.get('/', (_req, res) => {
   });
 });
 
-router.post('/check', (req, res) => {
+router.post('/check', publicCheckLimit, (req, res) => {
   const phone = normalizePhone(req.body?.phone);
   if (!phone) return res.status(400).json({ error: 'Въведи валиден телефон (напр. 0888 123 456).' });
   if (phoneTaken(phone)) return res.status(409).json({ error: DUPLICATE });
   res.json({ ok: true });
 });
 
-router.post('/', (req, res) => {
+router.post('/', discSubmitLimit, (req, res) => {
   const name = (typeof req.body?.name === 'string' ? req.body.name : '').trim().slice(0, 100);
   if (!name) return res.status(400).json({ error: 'Въведи име и фамилия.' });
   const phone = normalizePhone(req.body?.phone);
